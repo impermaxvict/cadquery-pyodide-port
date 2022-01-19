@@ -1,0 +1,27 @@
+package:
+  name: occt
+  version: 7.5.3 # V7_5_3p1
+
+source:
+  url: https://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;sf=tgz;h=refs/tags/V7_5_3p1
+  sha256: 0425c0aac2c77935f422791ab4e29adae3f7f3443a18835d52843df21309f356
+
+requirements:
+  run:
+    - freetype
+
+build:
+  library: true
+  script: |
+    mkdir ./build/
+    emcmake cmake \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -D3RDPARTY_FREETYPE_DIR:PATH=${PYODIDE_ROOT}/packages/freetype/build/freetype-2.11.1/install/ \
+      -DBUILD_MODULE_Draw:BOOL=OFF \
+      -DBUILD_LIBRARY_TYPE=Static \
+      -DCMAKE_INSTALL_PREFIX:PATH=$( pwd )/install/ \
+      -S . \
+      -B ./build/
+    cd ./build/
+    emmake make -j ${PYODIDE_JOBS:-3}
+    emmake make install

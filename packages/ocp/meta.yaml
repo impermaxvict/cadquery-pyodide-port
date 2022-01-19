@@ -1,0 +1,102 @@
+package:
+  name: ocp
+  version: 7.5.3
+
+source:
+  url: https://github.com/CadQuery/OCP/archive/257c90a912e9477d4f97004fc8bc4cdfa752993c.zip
+  sha256: f3a4ab6242f3ed8c76be617e7f0ef78d9ca6bac6d5651d0f2d090190bef95d94
+  extras:
+    - [dump_symbols.py, dump_symbols.py]
+    - [fix_configuration_file.py, fix_configuration_file.py]
+    - [setup.py, setup.py]
+
+#requirements:
+#  run:
+#    - occt
+#    - rapidjson
+
+build:
+  script: |
+    rm -r opencascade/
+    ln -s ${PYODIDE_ROOT}/packages/occt/build/occt-V7_5_3p1/install/include/opencascade/ opencascade
+
+
+    echo 'Dumping exported symbols...'
+    rm symbols_mangled_*.dat
+    nm --version
+    python ./dump_symbols.py ${PYODIDE_ROOT}/packages/occt/build/occt-V7_5_3p1/install/lib/
+    ls -lah symbols_mangled_emscripten.dat
+
+
+    python -m pip install pybind11
+
+    echo 'Patching pybind11...'
+    sed \
+      -i \
+      's/static_assert(sizeof(IntType) <= sizeof(ssize_t), "Implicit narrowing is not permitted.");$//' \
+      "$( python -c 'import pybind11 ; print(pybind11.get_include())' )"/pybind11/detail/common.h
+
+
+    git clone --depth 1 https://github.com/CadQuery/pywrap.git
+
+    echo 'Removing progress bars...'
+    sed \
+      -i \
+      's/tqdm(modules)/tqdm(modules, disable=True)/' \
+      pywrap/bindgen/__init__.py
+    sed \
+      -i \
+      's/tqdm(module_dict.items())/tqdm(module_dict.items(), disable=True)/' \
+      pywrap/bindgen/__init__.py
+
+    cd pywrap
+    rm -r opencascade/
+    rm symbols_mangled_*.dat ocp.toml FindOpenCascade.cmake
+    python -m pip install -e .
+    cd ..
+
+    python -m pip show --verbose pywrap
+
+    ls -lah ${HOME}/.local/bin/pywrap
+
+
+    # https://cmake.org/cmake/help/v3.22/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
+    # https://github.com/Sarcasm/compdb
+
+
+    echo 'Fixing configuration file...'
+    python ./fix_configuration_file.py
+
+
+    echo 'Generating bindings...'
+    CONDA_PREFIX=${PYODIDE_ROOT}/packages/occt/build/occt-V7_5_3p1/install/ \
+      ${HOME}/.local/bin/pywrap \
+      --verbose \
+      --clean \
+      --njobs ${PYODIDE_JOBS:-3} \
+      --libclang /usr/lib/llvm-7/lib/libclang.so \
+      --include /usr/lib/llvm-7/include/ \
+      all \
+      ocp.toml \
+      Linux
+
+
+    echo 'Preparing compilation...'
+
+    rm OCP/FindOpenCascade.cmake
+    rm OCP/CMakeLists.txt
+
+    sed -i 's/off_type buf_sought;$/off_type buf_sought = 0;/' OCP/pystreambuf.h
+
+    # Fixed ocp.toml using the fix_configuration_file.py script
+    [ -f OCP/RWGltf.cpp ] && sed -i 's/.def(py::init< int & >()  , py::arg("theOStream") )$//' OCP/RWGltf.cpp
+
+    # rm OCP/OpenGl*
+
+    ls -lah ./OCP/
+
+    sed -i '993,+3d' OCP/Standard.cpp
+
+
+    echo 'Ready for packaging!'
+    ls -lah ./OCP/

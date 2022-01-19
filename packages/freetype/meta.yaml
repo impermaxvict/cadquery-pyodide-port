@@ -1,0 +1,19 @@
+package:
+  name: freetype
+  version: 2.11.1
+
+source:
+  url: https://download.savannah.gnu.org/releases/freetype/freetype-2.11.1.tar.gz
+  sha256: f8db94d307e9c54961b39a1cc799a67d46681480696ed72ecf78d4473770f09b
+
+build:
+  library: true
+  script: |
+    mkdir install
+    mkdir build
+    cd build
+    emcmake cmake \
+      -DCMAKE_INSTALL_PREFIX:PATH=../install/ \
+      ..
+    emmake make -j ${PYODIDE_JOBS:-3}
+    emmake make install

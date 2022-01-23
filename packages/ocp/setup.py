@@ -28,7 +28,7 @@ RAPIDJSON_PATH = pathlib.Path(
 ext_modules = [
     Pybind11Extension(
         "OCP",
-        list(map(str, sorted(pathlib.Path("OCP").glob("*.cpp")))),
+        list(map(str, sorted(pathlib.Path.cwd().glob("*.cpp")))),
         include_dirs=[
             "OCP",
             str(OCCT_ROOT / "include" / "opencascade"),

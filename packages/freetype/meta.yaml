@@ -13,6 +13,7 @@ build:
     mkdir build
     cd build
     emcmake cmake \
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
       -DCMAKE_INSTALL_PREFIX:PATH=../install/ \
       ..
     emmake make -j ${PYODIDE_JOBS:-3}

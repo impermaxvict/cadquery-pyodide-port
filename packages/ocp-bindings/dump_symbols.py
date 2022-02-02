@@ -22,7 +22,8 @@ for toolkit in sorted(toolkits):
             if " in " in line:
                 exported_symbols.add(line.split(" in ")[0].strip())
             else:
-                raise "Error"
+                raise Exception("invalid symbol line")
 
 with open("symbols_mangled_emscripten.dat", "w") as fp:
-    fp.writelines(list(sorted(exported_symbols)))
+    fp.write("\n".join(list(sorted(exported_symbols))))
+    fp.write("\n")

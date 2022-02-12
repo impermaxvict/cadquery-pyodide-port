@@ -6,19 +6,56 @@ source:
   url: https://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;sf=tgz;h=refs/tags/V7_5_3p1
   sha256: 0425c0aac2c77935f422791ab4e29adae3f7f3443a18835d52843df21309f356
 
-requirements:
-  run:
-    - freetype
+#requirements:
+#  run:
+#    - freetype
 
 build:
   library: true
   script: |
+    # TODO: There must be a better way...
+    # Remove EM_ASM_
+    sed '4667,+3d' src/OpenGl/OpenGl_Context.cxx
+
+    # TODO: There must be a better way...
+    FILE=src/OSD/OSD_MemInfo.cxx \
+    && \
+    cat \
+      <( head -n 43 "${FILE}" ) \
+      <( echo 'size_t OSD_MemInfo_getModuleHeapLength() { return 500000000; }' ) \
+      <( tail -n +47 "${FILE}" ) \
+    > "${FILE}.tmp" \
+    && \
+    mv "${FILE}.tmp" "${FILE}"
+
+    # TODO: There must be a better way...
+    # Remove EM_JS
+    FILE=src/Message/Message_PrinterSystemLog.cxx \
+    && \
+    cat \
+      <( head -n 57 "${FILE}" ) \
+      <( \
+        echo 'void occJSConsoleDebug(const char* theStr) {}' \
+        && \
+        echo 'void occJSConsoleInfo(const char* theStr) {}' \
+        && \
+        echo 'void occJSConsoleWarn(const char* theStr) {}' \
+        && \
+        echo 'void occJSConsoleError(const char* theStr) {}' \
+      ) \
+      <( tail -n +79 "${FILE}" ) \
+    > "${FILE}.tmp" \
+    && \
+    mv "${FILE}.tmp" "${FILE}"
+
     mkdir ./build/
     emcmake cmake \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
       -D3RDPARTY_FREETYPE_DIR:PATH=${PYODIDE_ROOT}/packages/freetype/build/freetype-2.11.1/install/ \
       -DBUILD_MODULE_Draw:BOOL=OFF \
       -DBUILD_LIBRARY_TYPE=Static \
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+      -DCMAKE_CXX_FLAGS='-s SIDE_MODULE=1' \
       -DCMAKE_INSTALL_PREFIX:PATH=$( pwd )/install/ \
       -S . \
       -B ./build/

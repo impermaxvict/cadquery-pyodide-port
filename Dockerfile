@@ -77,6 +77,19 @@ RUN \
 
 
 USER root
+ADD ./packages/occt-debug/ /src/pyodide/packages/occt-debug/
+RUN chown -R "${BUILDER_USER}":"${BUILDER_USER}" \
+	/src/pyodide/packages/occt-debug/
+USER "${BUILDER_USER}"
+
+RUN \
+	cd /src/pyodide/ \
+	&& \
+	PYODIDE_PACKAGES="occt-debug" make
+
+
+
+USER root
 ADD ./packages/ocp-bindings/ /src/pyodide/packages/ocp-bindings/
 RUN chown -R "${BUILDER_USER}":"${BUILDER_USER}" \
 	/src/pyodide/packages/ocp-bindings/
@@ -110,5 +123,6 @@ COPY --from=0 /src/pyodide/packages/freetype/build/ /
 COPY --from=0 /src/pyodide/packages/rapidjson/build/ /
 COPY --from=0 /src/pyodide/packages/occt/build/ /
 COPY --from=0 /src/pyodide/packages/pybind11/build/ /
+COPY --from=0 /src/pyodide/packages/occt-debug/build/ /
 COPY --from=0 /src/pyodide/packages/ocp-bindings/build/ /
 COPY --from=0 /src/pyodide/packages/ocp/build/ /

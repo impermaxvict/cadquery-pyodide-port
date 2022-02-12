@@ -1,0 +1,11 @@
+package:
+  name: occt-debug
+  version: 0.0.0
+
+source:
+  path: src
+
+#requirements:
+#  run:
+#    - occt
+#    - pybind11

@@ -4,7 +4,7 @@ import toml
 
 OCCT_INCLUDE_DIR = (
     pathlib.Path(os.environ.get("PYODIDE_ROOT", "/src/pyodide"))
-    / "packages/occt/build/occt-V7_5_3p1/install/include/opencascade/"
+    / "packages/occt/build/occt-7.5.3/install/include/opencascade/"
 )
 assert OCCT_INCLUDE_DIR.is_dir()
 

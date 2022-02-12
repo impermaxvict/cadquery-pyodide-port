@@ -14,28 +14,20 @@ source:
 #  run:
 #    - occt
 #    - rapidjson
+#    - pybind11
 
 build:
   library: true
   script: |
     rm -r opencascade/
-    ln -s ${PYODIDE_ROOT}/packages/occt/build/occt-V7_5_3p1/install/include/opencascade/ opencascade
+    ln -s ${PYODIDE_ROOT}/packages/occt/build/occt-7.5.3/install/include/opencascade/ opencascade
 
 
     echo 'Dumping exported symbols...'
     rm symbols_mangled_*.dat
     nm --version
-    python ./dump_symbols.py ${PYODIDE_ROOT}/packages/occt/build/occt-V7_5_3p1/install/lib/
+    python ./dump_symbols.py ${PYODIDE_ROOT}/packages/occt/build/occt-7.5.3/install/lib/
     ls -lah symbols_mangled_emscripten.dat
-
-
-    python -m pip install pybind11
-
-    echo 'Patching pybind11...'
-    sed \
-      -i \
-      's/static_assert(sizeof(IntType) <= sizeof(ssize_t), "Implicit narrowing is not permitted.");$//' \
-      "$( python -c 'import pybind11 ; print(pybind11.get_include())' )"/pybind11/detail/common.h
 
 
     git clone --depth 1 https://github.com/CadQuery/pywrap.git
@@ -70,7 +62,7 @@ build:
 
 
     echo 'Generating bindings...'
-    CONDA_PREFIX=${PYODIDE_ROOT}/packages/occt/build/occt-V7_5_3p1/install/ \
+    CONDA_PREFIX=${PYODIDE_ROOT}/packages/occt/build/occt-7.5.3/install/ \
       ${HOME}/.local/bin/pywrap \
       --verbose \
       --clean \

@@ -10,8 +10,10 @@ source:
 #requirements:
 #  run:
 #    - ocp-bindings
+#    - pybind11
 
 build:
+  cflags: -s SIDE_MODULE=1
   script: |
     rm FindOpenCascade.cmake
     rm CMakeLists.txt
@@ -19,14 +21,6 @@ build:
     sed -i 's/off_type buf_sought;$/off_type buf_sought = 0;/' pystreambuf.h
 
     rm OpenGl*
-
-    python -m pip install pybind11
-
-    echo 'Patching pybind11...'
-    sed \
-      -i \
-      's/static_assert(sizeof(IntType) <= sizeof(ssize_t), "Implicit narrowing is not permitted.");$//' \
-      "$( python -c 'import pybind11 ; print(pybind11.get_include())' )"/pybind11/detail/common.h
 
     # TODO: Replace this since it might break anytime.
     sed -i '1115,+3d' Standard.cpp
@@ -37,5 +31,7 @@ build:
     cp OCP.txt OCP.cpp
     cp Standard.txt Standard.cpp
 
+    # TODO: Remove this hack
+    cp /src/pyodide/packages/ocp/setup.py .
 
     ls -lah

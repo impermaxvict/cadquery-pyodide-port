@@ -1,10 +1,14 @@
-from setuptools import setup
-
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from setuptools import setup, Extension
 
 import pathlib
 
-OCCT_ROOT = pathlib.Path("/src/pyodide/packages/occt/build/occt-V7_5_3p1/install/")
+OCCT_ROOT = pathlib.Path("/src/pyodide/packages/occt/build/occt-7.5.3/install/")
+assert OCCT_ROOT.is_dir()
+
+pybind11_include_dir = pathlib.Path(
+    "/src/pyodide/packages/pybind11/build/pybind11-2.9.1/include/"
+)
+assert pybind11_include_dir.is_dir()
 
 
 def find_occt_libs():
@@ -16,7 +20,6 @@ def find_occt_libs():
         # libs.append(lib.stem[3:])
         libs.append(lib.resolve())
     libs = list(map(str, libs))
-    print("OCCT libraries:")
     print(libs)
     return libs
 
@@ -24,15 +27,17 @@ def find_occt_libs():
 RAPIDJSON_PATH = pathlib.Path(
     "/src/pyodide/packages/rapidjson/build/rapidjson-1.1.0/include/"
 )
+assert RAPIDJSON_PATH.is_dir()
 
 ext_modules = [
-    Pybind11Extension(
+    Extension(
         "OCP",
         list(map(str, sorted(pathlib.Path.cwd().glob("*.cpp")))),
         include_dirs=[
-            "OCP",
+            str(OCCT_ROOT / "include"),
             str(OCCT_ROOT / "include" / "opencascade"),
             str(RAPIDJSON_PATH),
+            str(pybind11_include_dir),
         ],
         library_dirs=[
             str(OCCT_ROOT / "lib"),
@@ -46,7 +51,6 @@ setup(
     name="ocp",
     version="7.5.3",
     ext_modules=ext_modules,
-    cmdclass={"build_ext": build_ext},
     zip_safe=False,
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 )

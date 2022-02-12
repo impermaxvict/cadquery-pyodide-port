@@ -8,3 +8,9 @@ source:
 
 build:
   library: true
+  script: |
+    # TODO: Remove this hack
+    sed \
+      -i \
+      's/static_assert(sizeof(IntType) <= sizeof(ssize_t), "Implicit narrowing is not permitted.");$//' \
+      "$( python -c 'import pybind11 ; print(pybind11.get_include())' )"/pybind11/detail/common.h

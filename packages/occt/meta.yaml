@@ -15,7 +15,7 @@ build:
   script: |
     # TODO: There must be a better way...
     # Remove EM_ASM_
-    sed '4667,+3d' src/OpenGl/OpenGl_Context.cxx
+    sed -i '4667,+3d' src/OpenGl/OpenGl_Context.cxx
 
     # TODO: There must be a better way...
     FILE=src/OSD/OSD_MemInfo.cxx \

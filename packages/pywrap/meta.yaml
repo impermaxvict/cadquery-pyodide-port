@@ -1,0 +1,30 @@
+package:
+  name: pywrap
+  version: 0.0.0
+
+source:
+  url: https://github.com/CadQuery/pywrap/archive/refs/heads/master.zip
+  sha256: c2444c5e9636f9df31aea2355ebd318a25d7dbf1e8cfa94e9a49ce2671e236e2
+
+build:
+  library: true
+  script: |
+    echo 'Removing progress bars...'
+    sed \
+      -i \
+      's/tqdm(modules)/tqdm(modules, disable=True)/' \
+      bindgen/__init__.py
+    sed \
+      -i \
+      's/tqdm(module_dict.items())/tqdm(module_dict.items(), disable=True)/' \
+      bindgen/__init__.py
+
+    rm -r opencascade/
+    rm symbols_mangled_*.dat ocp.toml FindOpenCascade.cmake
+
+    python -m pip install -e .
+
+    python -m pip show --verbose pywrap
+
+    # https://cmake.org/cmake/help/v3.22/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
+    # https://github.com/Sarcasm/compdb

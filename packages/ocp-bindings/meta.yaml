@@ -15,6 +15,7 @@ source:
 #    - occt
 #    - rapidjson
 #    - pybind11
+#    - pywrap
 
 build:
   library: true
@@ -30,29 +31,6 @@ build:
     ls -lah symbols_mangled_emscripten.dat
 
 
-    git clone --depth 1 https://github.com/CadQuery/pywrap.git
-
-    echo 'Removing progress bars...'
-    sed \
-      -i \
-      's/tqdm(modules)/tqdm(modules, disable=True)/' \
-      pywrap/bindgen/__init__.py
-    sed \
-      -i \
-      's/tqdm(module_dict.items())/tqdm(module_dict.items(), disable=True)/' \
-      pywrap/bindgen/__init__.py
-
-    cd pywrap
-    rm -r opencascade/
-    rm symbols_mangled_*.dat ocp.toml FindOpenCascade.cmake
-    python -m pip install -e .
-    cd ..
-
-    python -m pip show --verbose pywrap
-
-    ls -lah ${HOME}/.local/bin/pywrap
-
-
     # https://cmake.org/cmake/help/v3.22/variable/CMAKE_EXPORT_COMPILE_COMMANDS.html
     # https://github.com/Sarcasm/compdb
 
@@ -63,7 +41,7 @@ build:
 
     echo 'Generating bindings...'
     CONDA_PREFIX=${PYODIDE_ROOT}/packages/occt/build/occt-7.5.3/install/ \
-      ${HOME}/.local/bin/pywrap \
+      python -m bindgen \
       --verbose \
       --clean \
       --njobs ${PYODIDE_JOBS:-3} \

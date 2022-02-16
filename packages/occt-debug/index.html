@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta
+			charset="utf-8"
+		/>
+	</head>
+	<body>
+		<p>This is a test!</p>
+		<script
+			src="https://cdn.jsdelivr.net/pyodide/v0.19.0/full/pyodide.js"
+		>
+		</script>
+		<script>
+			(async () => {
+				const pyodide = await loadPyodide({
+					indexURL: "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/",
+				});
+				await pyodide.loadPackage("http://0.0.0.0:8000/occt-debug.js");
+				await pyodide.runPython(
+					"import OCCTDebug ; print(OCCTDebug.add(1, 2))"
+				);
+				await pyodide.runPython(
+					"import OCCTDebug ; print(OCCTDebug.arccos(0.7))"
+				);
+			})();
+		</script>
+	</body>
+</html>

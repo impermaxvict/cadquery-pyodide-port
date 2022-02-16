@@ -5,7 +5,6 @@ package:
 source:
   url: https://github.com/CadQuery/OCP/archive/refs/tags/7.5.3.0.tar.gz
   sha256: 0bbbd895b5e955ba7639e09b696c4b0a1df3de4bbe5a60c981ef20f4ac00a030
-  extract_dir: ocp
   extras:
     - [dump_symbols.py, dump_symbols.py]
     - [fix_configuration_file.py, fix_configuration_file.py]

@@ -3,7 +3,7 @@ package:
   version: 7.5.3
 
 source:
-  path: /src/pyodide/packages/ocp-bindings/build/ocp/OCP/
+  path: /src/pyodide/packages/ocp-bindings/build/ocp-bindings-7.5.3/OCP/
   extras:
     - [setup.py, setup.py]
 

@@ -14,15 +14,17 @@ assert pybind11_include_dir.is_dir()
 def find_occt_libs():
     libs = []
     for lib in sorted((OCCT_ROOT / "lib").glob("lib*.a")):
-        # if lib.stem[3:] != "TKernel":
-        #    continue
+        lib = lib.resolve()
         # https://dev.opencascade.org/doc/refman/html/index.html
         if lib.stem[3:] in ["TKernel", "TKMath"]:
             # Module FoundationClasses
-            libs.append(lib.resolve())
+            libs.append(lib)
         elif lib.stem[3:] in ["TKG2d", "TKG3d", "TKGeomBase", "TKBRep"]:
             # Module ModelingData
-            libs.append(lib.resolve())
+            if lib.stem[3:] == "TKBRep":
+                # If the following line is replaced with "continue", it works.
+                pass
+            libs.append(lib)
     libs = list(map(str, libs))
     return libs
 

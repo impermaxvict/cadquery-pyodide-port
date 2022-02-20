@@ -52,6 +52,12 @@ build:
     emcmake cmake \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
       -D3RDPARTY_FREETYPE_DIR:PATH=${PYODIDE_ROOT}/packages/freetype/build/freetype-2.11.1/install/ \
+      -DBUILD_MODULE_FoundationClasses:BOOL=ON \
+      -DBUILD_MODULE_ModelingData:BOOL=ON \
+      -DBUILD_MODULE_ModelingAlgorithms:BOOL=OFF \
+      -DBUILD_MODULE_Visualization:BOOL=OFF \
+      -DBUILD_MODULE_ApplicationFramework:BOOL=OFF \
+      -DBUILD_MODULE_DataExchange:BOOL=OFF \
       -DBUILD_MODULE_Draw:BOOL=OFF \
       -DBUILD_LIBRARY_TYPE=Static \
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON \

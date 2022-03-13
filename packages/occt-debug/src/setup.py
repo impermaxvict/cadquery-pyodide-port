@@ -2,7 +2,7 @@ from setuptools import setup, Extension
 
 import pathlib
 
-OCCT_ROOT = pathlib.Path("/src/pyodide/packages/occt/build/occt-7.5.3/install/")
+OCCT_ROOT = pathlib.Path("/src/pyodide/packages/occt/build/occt-7.6.1/install/")
 assert OCCT_ROOT.is_dir()
 
 pybind11_include_dir = pathlib.Path(
@@ -11,22 +11,22 @@ pybind11_include_dir = pathlib.Path(
 assert pybind11_include_dir.is_dir()
 
 
-def find_occt_libs():
-    libs = []
-    for lib in sorted((OCCT_ROOT / "lib").glob("lib*.a")):
-        lib = lib.resolve()
-        # https://dev.opencascade.org/doc/refman/html/index.html
-        if lib.stem[3:] in ["TKernel", "TKMath"]:
-            # Module FoundationClasses
-            libs.append(lib)
-        elif lib.stem[3:] in ["TKG2d", "TKG3d", "TKGeomBase", "TKBRep"]:
-            # Module ModelingData
-            if lib.stem[3:] == "TKBRep":
-                # If the following line is replaced with "continue", it works.
-                pass
-            libs.append(lib)
-    libs = list(map(str, libs))
-    return libs
+def find_occt_libs() -> list[str]:
+    libraries: list[str] = []
+
+    # https://dev.opencascade.org/doc/refman/html/index.html
+
+    # Module FoundationClasses
+    libraries.extend(["TKernel", "TKMath"])
+
+    # Module ModelingData
+    libraries.extend(["TKG2d", "TKG3d", "TKGeomBase", "TKBRep"])
+
+    # The order of objects matters!
+    libs: list[pathlib.Path] = []
+    for lib in reversed(libraries):
+        libs.append((OCCT_ROOT / "lib" / ("lib" + lib + ".a")).resolve())
+    return list(map(str, libs))
 
 
 ext_modules = [
@@ -41,9 +41,7 @@ ext_modules = [
         library_dirs=[
             str(OCCT_ROOT / "lib"),
         ],
-        # libraries=find_occt_libs(),
         extra_objects=find_occt_libs(),
-        extra_compile_args=["-O0"],
     ),
 ]
 

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.3
 FROM pyodide/pyodide:0.19.0
 
-RUN --network=none useradd --system --user-group pyodide
+RUN --network=none useradd --system --user-group --create-home pyodide
 
 RUN --network=none chown -R pyodide:pyodide /src/pyodide/
 
@@ -13,6 +13,9 @@ USER pyodide
 USER root
 RUN apt update && apt install -y libclang-dev
 USER pyodide
+
+
+RUN PYODIDE_PACKAGES="sharedlib-test" make
 
 
 ADD --chown=pyodide ./packages/freetype/ packages/freetype/

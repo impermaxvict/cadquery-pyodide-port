@@ -9,3 +9,29 @@ source:
 #  run:
 #    - occt
 #    - pybind11
+
+build:
+  script: |
+    # https://dev.opencascade.org/doc/refman/html/index.html
+
+    TOOLKIT=TKBRep
+
+    OCCT_ROOT=/src/pyodide/packages/occt/build/occt-7.6.1/
+
+    mkdir toolkit
+
+    cp ${OCCT_ROOT}/install/lib/lib${TOOLKIT}.a toolkit/
+
+    emar tD toolkit/lib${TOOLKIT}.a > toolkit/${TOOLKIT}.txt
+
+    # cat ${OCCT_ROOT}/src/${TOOLKIT}/PACKAGES
+
+    # TODO: Find the problem with the package "BinTools"!
+    emar dDv toolkit/lib${TOOLKIT}.a \
+      $( grep '^BinTools[_|.]' toolkit/${TOOLKIT}.txt )
+
+    emar sD toolkit/lib${TOOLKIT}.a
+
+    emar tD toolkit/lib${TOOLKIT}.a > toolkit/${TOOLKIT}.new.txt
+
+    mv toolkit/lib${TOOLKIT}.a ${OCCT_ROOT}/install/lib/lib${TOOLKIT}.a

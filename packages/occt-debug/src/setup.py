@@ -2,7 +2,7 @@ from setuptools import setup, Extension
 
 import pathlib
 
-OCCT_ROOT = pathlib.Path("/src/pyodide/packages/occt/build/occt-7.6.1/install/")
+OCCT_ROOT = pathlib.Path("/src/pyodide/packages/occt/build/occt-7.5.3/install/")
 assert OCCT_ROOT.is_dir()
 
 pybind11_include_dir = pathlib.Path(

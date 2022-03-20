@@ -1,18 +1,11 @@
+# syntax=docker/dockerfile:1.3
 FROM pyodide/pyodide:0.19.0
 
 ARG BUILDER_USER="pyusr"
 
-RUN \
-	groupadd -r "${BUILDER_USER}" \
-	&& \
-	useradd \
-		--no-log-init \
-		-r \
-		--create-home \
-		-g "${BUILDER_USER}" \
-		"${BUILDER_USER}"
+RUN --network=none useradd --system --user-group "${BUILDER_USER}"
 
-RUN chown -R "${BUILDER_USER}":"${BUILDER_USER}" /src/pyodide/
+RUN --network=none chown -R "${BUILDER_USER}":"${BUILDER_USER}" /src/pyodide/
 
 WORKDIR /src/pyodide/
 
@@ -41,7 +34,7 @@ RUN PYODIDE_PACKAGES="pybind11" make
 
 
 ADD --chown="${BUILDER_USER}" ./packages/occt-debug/ packages/occt-debug/
-RUN PYODIDE_PACKAGES="occt-debug" make
+RUN --network=none PYODIDE_PACKAGES="occt-debug" make
 
 
 ADD --chown="${BUILDER_USER}" ./packages/pywrap/ packages/pywrap/
@@ -53,18 +46,11 @@ RUN PYODIDE_PACKAGES="ocp-bindings" make
 
 
 ADD --chown="${BUILDER_USER}" ./packages/ocp/ packages/ocp/
-RUN PYODIDE_PACKAGES="ocp" make
+RUN --network=none PYODIDE_PACKAGES="ocp" make
 
 
 USER root
 
 FROM scratch
 
-COPY --from=0 /src/pyodide/packages/freetype/build/ /
-COPY --from=0 /src/pyodide/packages/rapidjson/build/ /
-COPY --from=0 /src/pyodide/packages/occt/build/ /
-COPY --from=0 /src/pyodide/packages/pybind11/build/ /
-COPY --from=0 /src/pyodide/packages/occt-debug/build/ /
-COPY --from=0 /src/pyodide/packages/pywrap/build/ /
-COPY --from=0 /src/pyodide/packages/ocp-bindings/build/ /
-COPY --from=0 /src/pyodide/packages/ocp/build/ /
+COPY --from=0 /src/pyodide/packages/occt-debug/build/ /build/occt-debug/

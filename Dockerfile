@@ -9,13 +9,14 @@ WORKDIR /src/pyodide/
 
 USER pyodide
 
+RUN PYODIDE_PACKAGES="sharedlib-test" make
+
+RUN --network=none PYODIDE_PACKAGES="sharedlib-test-py" make
+
 
 USER root
 RUN apt update && apt install -y libclang-dev
 USER pyodide
-
-
-RUN PYODIDE_PACKAGES="sharedlib-test" make
 
 
 ADD --chown=pyodide ./packages/freetype/ packages/freetype/

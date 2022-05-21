@@ -1,0 +1,10 @@
+package:
+  name: occt-raw
+  version: 7.5.3
+
+source:
+  url: https://git.dev.opencascade.org/gitweb/?p=occt.git;a=snapshot;sf=tgz;h=refs/tags/V7_5_3p1
+  sha256: 0425c0aac2c77935f422791ab4e29adae3f7f3443a18835d52843df21309f356
+
+build:
+  library: true

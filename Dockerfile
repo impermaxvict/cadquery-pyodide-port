@@ -35,8 +35,13 @@ RUN cd rapidjson \
 	&& python -m pyodide_build buildpkg meta.yaml
 
 
+ADD --chown=pyodide ./packages/occt-raw/ occt-raw
+RUN cd occt-raw \
+	&& python -m pyodide_build buildpkg meta.yaml
+
+
 ADD --chown=pyodide ./packages/occt/ occt
-RUN cd occt \
+RUN --network=none cd occt \
 	&& python -m pyodide_build buildpkg meta.yaml
 
 

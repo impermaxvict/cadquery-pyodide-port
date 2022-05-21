@@ -1,58 +1,72 @@
 # syntax=docker/dockerfile:1.3
-FROM pyodide/pyodide:0.19.0
+FROM pyodide/pyodide:0.20.0
 
 RUN --network=none useradd --system --user-group --create-home pyodide
 
-RUN --network=none chown -R pyodide:pyodide /src/pyodide/
+RUN --network=none chown -R pyodide:pyodide /src/pyodide/packages/
 
-WORKDIR /src/pyodide/
+WORKDIR /src/pyodide/packages/
 
 USER pyodide
 
-RUN PYODIDE_PACKAGES="sharedlib-test" make
+RUN pip install ../pyodide-build
 
-RUN --network=none PYODIDE_PACKAGES="sharedlib-test-py" make
+
+RUN --network=none cd sharedlib-test \
+	&& python -m pyodide_build buildpkg meta.yaml
+
+
+RUN --network=none cd sharedlib-test-py \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
 USER root
-RUN apt update && apt install -y libclang-dev
+RUN apt update && apt install -y libclang-dev && rm -rf /var/lib/apt/lists/*
 USER pyodide
 
 
-ADD --chown=pyodide ./packages/freetype/ packages/freetype/
-RUN PYODIDE_PACKAGES="freetype" make
+ADD --chown=pyodide ./packages/freetype/ freetype
+RUN cd freetype \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/rapidjson/ packages/rapidjson/
-RUN PYODIDE_PACKAGES="rapidjson" make
+ADD --chown=pyodide ./packages/rapidjson/ rapidjson
+RUN cd rapidjson \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/occt/ packages/occt/
-RUN PYODIDE_PACKAGES="occt" make
+ADD --chown=pyodide ./packages/occt/ occt
+RUN cd occt \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/pybind11/ packages/pybind11/
-RUN PYODIDE_PACKAGES="pybind11" make
+ADD --chown=pyodide ./packages/pybind11/ pybind11
+RUN cd pybind11 \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/occt-debug/ packages/occt-debug/
-RUN --network=none PYODIDE_PACKAGES="occt-debug" make
+ADD --chown=pyodide ./packages/occt-debug/ occt-debug
+RUN --network=none cd occt-debug \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/pywrap/ packages/pywrap/
-RUN PYODIDE_PACKAGES="pywrap" make
+ADD --chown=pyodide ./packages/pywrap/ pywrap
+RUN cd pywrap \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/ocp-bindings/ packages/ocp-bindings/
-RUN PYODIDE_PACKAGES="ocp-bindings" make
+ADD --chown=pyodide ./packages/ocp-bindings/ ocp-bindings
+RUN cd ocp-bindings \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/ocp/ packages/ocp/
-RUN --network=none PYODIDE_PACKAGES="ocp" make
+ADD --chown=pyodide ./packages/ocp/ ocp
+RUN --network=none cd ocp \
+	&& python -m pyodide_build buildpkg meta.yaml
 
 
 USER root
 
 FROM scratch
 
-COPY --from=0 /src/pyodide/packages/occt-debug/build/ /build/occt-debug/
+COPY --from=0 --chown=root /src/pyodide/packages/occt-debug/build/ /build/occt-debug/

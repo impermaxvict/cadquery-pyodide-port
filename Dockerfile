@@ -9,7 +9,7 @@ WORKDIR /src/pyodide/packages/
 
 USER pyodide
 
-RUN pip install ../pyodide-build
+RUN pip install /src/pyodide/pyodide-build
 
 
 RUN --network=none cd sharedlib-test \
@@ -17,21 +17,6 @@ RUN --network=none cd sharedlib-test \
 
 
 RUN --network=none cd sharedlib-test-py \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
-USER root
-RUN apt update && apt install -y libclang-dev && rm -rf /var/lib/apt/lists/*
-USER pyodide
-
-
-ADD --chown=pyodide ./packages/freetype/ freetype
-RUN cd freetype \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
-ADD --chown=pyodide ./packages/rapidjson/ rapidjson
-RUN cd rapidjson \
 	&& python -m pyodide_build buildpkg meta.yaml
 
 
@@ -45,33 +30,8 @@ RUN --network=none cd occt \
 	&& python -m pyodide_build buildpkg meta.yaml
 
 
-ADD --chown=pyodide ./packages/pybind11/ pybind11
-RUN cd pybind11 \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
-ADD --chown=pyodide ./packages/occt-debug/ occt-debug
-RUN --network=none cd occt-debug \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
-ADD --chown=pyodide ./packages/pywrap/ pywrap
-RUN cd pywrap \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
-ADD --chown=pyodide ./packages/ocp-bindings/ ocp-bindings
-RUN cd ocp-bindings \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
-ADD --chown=pyodide ./packages/ocp/ ocp
-RUN --network=none cd ocp \
-	&& python -m pyodide_build buildpkg meta.yaml
-
-
 USER root
 
 FROM scratch
 
-COPY --from=0 --chown=root /src/pyodide/packages/occt-debug/build/ /build/occt-debug/
+COPY --from=0 --chown=root /src/pyodide/packages/occt/build/ /build/occt/
